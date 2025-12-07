@@ -16,26 +16,29 @@ Namespace Persistence
             Try
                 Console.WriteLine("=== Starting Database Seeding ===")
                 
-                ' Check if data already exists
+                ' Check if SETAs already exist
                 Dim setaCount = Await _context.Setas.CountAsync()
-                If setaCount > 0 Then
-                    Console.WriteLine($"Database already seeded ({setaCount} SETAs found). Skipping seed.")
-                    Return
+                If setaCount = 0 Then
+                    ' First-time setup: Seed all base data
+                    Console.WriteLine("First-time setup detected. Seeding base data...")
+                    
+                    ' Seed SETAs
+                    Await SeedSetasAsync()
+                    
+                    ' Seed Sample Programmes
+                    Await SeedProgrammesAsync()
+                    
+                    ' Seed Sample Learners
+                    Await SeedLearnersAsync()
+                    
+                    ' Seed Sample Contracts
+                    Await SeedContractsAsync()
+                Else
+                    Console.WriteLine($"Base data already exists ({setaCount} SETAs found). Skipping base data seed.")
                 End If
                 
-                ' Seed SETAs
-                Await SeedSetasAsync()
-                
-                ' Seed Sample Programmes
-                Await SeedProgrammesAsync()
-                
-                ' Seed Sample Learners
-                Await SeedLearnersAsync()
-                
-                ' Seed Sample Contracts
-                Await SeedContractsAsync()
-                
-                ' Seed Duplication Rules
+                ' Always seed/update Duplication Rules (even if other data exists)
+                Console.WriteLine("Checking Duplication Rules...")
                 Dim rulesSeeder = New DuplicationRulesSeeder(_context)
                 Await rulesSeeder.SeedAsync()
                 

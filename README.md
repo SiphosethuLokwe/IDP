@@ -103,6 +103,128 @@ IDP/
    - API: `https://localhost:5001`
    - Frontend: `http://localhost:5173`
 
+## 📦 First-Time Setup & Database Seeding
+
+After running migrations, the database will be **automatically seeded** when you start the application for the first time. This ensures you have all necessary data to begin testing immediately.
+
+### What Gets Seeded Automatically
+
+| Data Type | Count | Description |
+|-----------|-------|-------------|
+| **SETAs** | 21 | All South African Sector Education and Training Authorities |
+| **Programmes** | 5 | Sample learnership programmes across different SETAs |
+| **Learners** | 6 | Sample learner profiles (includes duplicate test cases) |
+| **Contracts** | 2 | Sample learner-programme funding contracts |
+| **Duplication Rules** | 5 | Configurable detection rules (Priority 100-70, Confidence 100%-75%) |
+
+### Seeding Process
+
+The seeding happens automatically in `Program.vb` during application startup:
+- **First run**: All base data (SETAs, Programmes, Learners, Contracts) is seeded
+- **Subsequent runs**: Only checks and updates Duplication Rules
+- **Idempotent**: Safe to run multiple times (won't create duplicates)
+
+### Verification Steps
+
+1. **Start the Application**
+   ```powershell
+   cd src/Presentation
+   dotnet run
+   ```
+
+2. **Check Console Output**
+   Look for these messages:
+   ```
+   === Starting Database Seeding ===
+   Seeding 21 SETAs...
+   Seeding 5 Programmes...
+   Seeding 6 Sample Learners...
+   Checking Duplication Rules...
+   === Database Seeding Completed Successfully ===
+   ```
+
+3. **Verify Database**
+   ```sql
+   SELECT COUNT(*) FROM Setas;           -- Should return 21
+   SELECT COUNT(*) FROM DuplicationRules; -- Should return 5
+   SELECT COUNT(*) FROM Learners;        -- Should return 6
+   ```
+
+### Testing Duplicate Detection
+
+Two **Thabo Mbeki** learners are automatically seeded for testing the duplicate detection system:
+
+| Field | Learner 1 | Learner 2 |
+|-------|-----------|-----------|
+| ID Number | 9501015800081 | 9501025800082 |
+| Name | Thabo Mbeki | Thabo Mbeki |
+| DOB | 1995-01-01 | 1995-01-02 |
+| Phone | +27823456789 | +27823456789 |
+
+**Expected Detection Result**: ~77% fuzzy match (Level 2 detection)
+
+#### Testing via API
+
+```powershell
+# Check for duplicates when registering Learner 2
+POST https://localhost:5001/api/duplications/check
+Content-Type: application/json
+
+{
+  "idNumber": "9501025800082",
+  "firstName": "Thabo",
+  "lastName": "Mbeki",
+  "dateOfBirth": "1995-01-02",
+  "phoneNumber": "+27823456789"
+}
+```
+
+**Expected Response**:
+```json
+{
+  "hasPotentialDuplicates": true,
+  "duplicates": [
+    {
+      "learnerId": 1,
+      "matchScore": 76.92,
+      "matchType": "FuzzyMatch",
+      "matchDetails": "Fuzzy Match: ID similarity (85%), Name match (100%), Phone match (100%), Phonetic match (100%)"
+    }
+  ]
+}
+```
+
+### Duplication Rules Seeded
+
+| Priority | Rule Name | Confidence | Condition |
+|----------|-----------|------------|-----------|
+| 100 | Exact ID Match | 100% | ID number matches exactly |
+| 90 | Name + DOB Match | 95% | Full name and date of birth match |
+| 85 | Name + DOB + SETA | 90% | Name, DOB, and same SETA match |
+| 80 | Name + Phone Match | 85% | Full name and phone number match |
+| 70 | Email Match (Different Name) | 75% | Email matches but name differs |
+
+These rules can be modified directly in the database without redeployment.
+
+### Troubleshooting Seeding
+
+**Issue**: Console shows "Database already seeded. Skipping seed."
+- **Cause**: Base data already exists (expected behavior)
+- **Fix**: Duplication Rules are still checked/updated automatically
+
+**Issue**: No seeding messages appear
+- **Check**: `appsettings.json` connection string is correct
+- **Check**: SQL Server is running and accessible
+- **Check**: Migrations have been applied (`dotnet ef database update`)
+
+**Issue**: Seeding fails with errors
+- **Solution**: Drop and recreate the database:
+  ```powershell
+  dotnet ef database drop --force
+  dotnet ef database update
+  dotnet run
+  ```
+
 ## 🔧 Configuration
 
 ### App Settings
