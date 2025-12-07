@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>IDP.Application</RootNamespace>
+    <OptionStrict>On</OptionStrict>
+    <OptionExplicit>On</OptionExplicit>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\IDP.Domain.vbproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RulesEngine" Version="5.1.2" />
+    <PackageReference Include="FluentValidation" Version="11.9.0" />
+  </ItemGroup>
+
+</Project>

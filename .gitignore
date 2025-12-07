@@ -1,0 +1,120 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options
+.vscode/
+*.suo
+*.user
+*.sln.docstates
+*.userprefs
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Build Results
+*.dll
+*.exe
+*.pdb
+*.cache
+*.ilk
+*.log
+*.lib
+*.sbr
+*.sdf
+*.opensdf
+*.unsuccessfulbuild
+*.VC.db
+*.VC.VC.opendb
+
+# NuGet Packages
+*.nupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Node.js (for React client)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+dist/
+dist-ssr/
+*.local
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+# Database
+*.mdf
+*.ldf
+*.ndf
+
+# ML.NET model files (optional - include if models should be regenerated)
+*.zip
+MLModels/*.zip
+
+# IDE
+*.swp
+*~
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Backup files
+*.bak
+*.backup
+*_backup.*
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# React build output
+client/dist/
+client/build/
