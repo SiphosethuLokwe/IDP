@@ -3,10 +3,10 @@ Imports System.Threading.Tasks
 Imports System.Text.Json
 Imports IDP.Application.DTOs
 Imports IDP.Application.Interfaces
-Imports IDP.Application.ML
+'Imports IDP.Application.ML
 Imports IDP.Domain.Entities
 Imports IDP.Domain.Enums
-Imports Microsoft.ML
+'Imports Microsoft.ML
 Imports RulesEngine.Models
 
 Namespace Services
@@ -23,28 +23,28 @@ Namespace Services
         Private ReadOnly _rulesEngine As RulesEngine.RulesEngine
         
         ' AI/ML Services
-        Private ReadOnly _fuzzyMatching As FuzzyMatchingService
-        Private ReadOnly _mlPrediction As MLPredictionService
-        Private ReadOnly _explainability As ExplainabilityService
+        'Private ReadOnly _fuzzyMatching As FuzzyMatchingService
+        'Private ReadOnly _mlPrediction As MLPredictionService
+        'Private ReadOnly _explainability As ExplainabilityService
         Private ReadOnly _useAI As Boolean
         
         Public Sub New(learnerRepository As ILearnerRepository, 
                       flagRepository As IDuplicationFlagRepository,
                       ruleRepository As IDuplicationRuleRepository,
-                      Optional fuzzyMatching As FuzzyMatchingService = Nothing,
-                      Optional mlPrediction As MLPredictionService = Nothing,
-                      Optional explainability As ExplainabilityService = Nothing,
-                      Optional useAI As Boolean = True)
+                      Optional useAI As Boolean = False)
+                      'Optional fuzzyMatching As FuzzyMatchingService = Nothing,
+                      'Optional mlPrediction As MLPredictionService = Nothing,
+                      'Optional explainability As ExplainabilityService = Nothing,
             _learnerRepository = learnerRepository
             _flagRepository = flagRepository
             _ruleRepository = ruleRepository
             _rulesEngine = New RulesEngine.RulesEngine(Array.Empty(Of Workflow)(), Nothing)
             
             ' Initialize AI services
-            _fuzzyMatching = If(fuzzyMatching, New FuzzyMatchingService())
-            _mlPrediction = mlPrediction
-            _explainability = If(explainability, New ExplainabilityService(_fuzzyMatching))
-            _useAI = useAI AndAlso mlPrediction IsNot Nothing
+            '_fuzzyMatching = If(fuzzyMatching, New FuzzyMatchingService())
+            '_mlPrediction = mlPrediction
+            '_explainability = If(explainability, New ExplainabilityService(_fuzzyMatching))
+            _useAI = False 'useAI AndAlso mlPrediction IsNot Nothing
             
             If _useAI Then
                 Console.WriteLine("✓ AI-Enhanced Duplicate Detection ENABLED")
@@ -72,20 +72,20 @@ Namespace Services
                     Continue For
                 End If
                 
-                ' LEVEL 2: Fuzzy String Matching (Fast)
-                Dim fuzzyMatch = CheckFuzzyMatches(learner, candidate)
-                If fuzzyMatch IsNot Nothing Then
-                    result.Matches.Add(fuzzyMatch)
-                    Continue For
-                End If
+                ' LEVEL 2: Fuzzy String Matching (Fast) - DISABLED FOR NOW
+                'Dim fuzzyMatch = CheckFuzzyMatches(learner, candidate)
+                'If fuzzyMatch IsNot Nothing Then
+                '    result.Matches.Add(fuzzyMatch)
+                '    Continue For
+                'End If
                 
-                ' LEVEL 3: AI/ML Prediction (Most Accurate)
-                If _useAI Then
-                    Dim aiMatch = CheckAIMatch(learner, candidate)
-                    If aiMatch IsNot Nothing Then
-                        result.Matches.Add(aiMatch)
-                    End If
-                End If
+                ' LEVEL 3: AI/ML Prediction (Most Accurate) - DISABLED FOR NOW
+                'If _useAI Then
+                '    Dim aiMatch = CheckAIMatch(learner, candidate)
+                '    If aiMatch IsNot Nothing Then
+                '        result.Matches.Add(aiMatch)
+                '    End If
+                'End If
             Next
             
             result.HasDuplicates = result.Matches.Count > 0
@@ -124,86 +124,20 @@ Namespace Services
         ''' <summary>
         ''' LEVEL 2: Fuzzy matching - Fast, handles typos and variations
         ''' </summary>
-        Private Function CheckFuzzyMatches(learner As Learner, candidate As Learner) As DuplicateMatchDto
-            ' Calculate similarities using fuzzy algorithms
-            Dim idSim = If(Not String.IsNullOrEmpty(learner.IdNumber) AndAlso Not String.IsNullOrEmpty(candidate.IdNumber),
-                          _fuzzyMatching.CompareIdNumbers(learner.IdNumber, candidate.IdNumber), 0.0F)
-            
-            Dim nameSim = 0.0F
-            If Not String.IsNullOrEmpty(learner.FirstName) AndAlso Not String.IsNullOrEmpty(candidate.FirstName) Then
-                nameSim = (_fuzzyMatching.JaroWinklerSimilarity(learner.FirstName, candidate.FirstName) + 
-                          _fuzzyMatching.JaroWinklerSimilarity(learner.LastName, candidate.LastName)) / 2.0F
-            End If
-            
-            Dim phoneticMatch = 0.0F
-            If Not String.IsNullOrEmpty(learner.LastName) AndAlso Not String.IsNullOrEmpty(candidate.LastName) Then
-                phoneticMatch = _fuzzyMatching.PhoneticMatch(learner.LastName, candidate.LastName)
-            End If
-            
-            Dim dobMatch = 0.0F
-            If learner.DateOfBirth.HasValue AndAlso candidate.DateOfBirth.HasValue Then
-                dobMatch = If(learner.DateOfBirth.Value = candidate.DateOfBirth.Value, 1.0F, 0.0F)
-            End If
-            
-            Dim phoneSim = 0.0F
-            If Not String.IsNullOrEmpty(learner.PhoneNumber) AndAlso Not String.IsNullOrEmpty(candidate.PhoneNumber) Then
-                phoneSim = _fuzzyMatching.CalculateSimilarity(learner.PhoneNumber, candidate.PhoneNumber)
-            End If
-            
-            ' Weighted scoring: ID (35%) + Name (25%) + DOB (25%) + Phone (10%) + Phonetic (5%)
-            Dim totalScore = (idSim * 0.35F) + (nameSim * 0.25F) + (dobMatch * 0.25F) + (phoneSim * 0.1F) + (phoneticMatch * 0.05F)
-            
-            ' High confidence fuzzy match (85%+)
-            If totalScore >= 0.85F Then
-                Console.WriteLine($"  ✓ FUZZY MATCH ({totalScore:P0}): {candidate.FirstName} {candidate.LastName}")
-                Dim reason = BuildFuzzyReason(idSim, nameSim, dobMatch, phoneSim, phoneticMatch)
-                Return CreateMatch(candidate, MatchType.FuzzyMatch, CDec(totalScore), reason)
-            End If
-            
-            ' Medium confidence match (70-84%)
-            If totalScore >= 0.70F Then
-                Console.WriteLine($"  ~ POSSIBLE MATCH ({totalScore:P0}): {candidate.FirstName} {candidate.LastName}")
-                Dim reason = BuildFuzzyReason(idSim, nameSim, dobMatch, phoneSim, phoneticMatch)
-                Return CreateMatch(candidate, MatchType.FuzzyMatch, CDec(totalScore), reason)
-            End If
-            
-            Return Nothing
-        End Function
+        'Private Function CheckFuzzyMatches(learner As Learner, candidate As Learner) As DuplicateMatchDto
+        '   ... TEMPORARILY DISABLED FOR MIGRATION ...
+        'End Function
         
         ''' <summary>
         ''' LEVEL 3: AI/ML Prediction - Most accurate, uses trained model
         ''' </summary>
-        Private Function CheckAIMatch(learner As Learner, candidate As Learner) As DuplicateMatchDto
-            Try
-                ' Get AI prediction with explanation
-                Dim explanation = _mlPrediction.PredictDuplicate(learner, candidate)
-                
-                ' If ML model predicts duplicate with confidence >= 50%
-                If explanation.IsDuplicate AndAlso explanation.OverallConfidence >= 0.5D Then
-                    Console.WriteLine($"  🤖 AI MATCH ({explanation.OverallConfidence:P0}): {candidate.FirstName} {candidate.LastName}")
-                    Console.WriteLine($"     Risk: {explanation.RiskLevel}, Action: {explanation.RecommendedAction}")
-                    
-                    Dim shortExplanation = _explainability.GetShortExplanation(learner, candidate, explanation.OverallConfidence)
-                    Return CreateMatchWithExplanation(candidate, MatchType.AIMatch, explanation.OverallConfidence, shortExplanation, explanation)
-                End If
-            Catch ex As Exception
-                Console.WriteLine($"  ⚠ AI prediction failed: {ex.Message}")
-            End Try
-            
-            Return Nothing
-        End Function
+        'Private Function CheckAIMatch(learner As Learner, candidate As Learner) As DuplicateMatchDto
+        '   ... TEMPORARILY DISABLED FOR MIGRATION ...
+        'End Function
         
-        Private Function BuildFuzzyReason(idSim As Single, nameSim As Single, dobMatch As Single, phoneSim As Single, phoneticMatch As Single) As String
-            Dim reasons = New List(Of String)()
-            
-            If idSim >= 0.9F Then reasons.Add($"ID {idSim:P0} similar")
-            If nameSim >= 0.85F Then reasons.Add($"name {nameSim:P0} similar")
-            If dobMatch = 1.0F Then reasons.Add("same DOB")
-            If phoneSim >= 0.9F Then reasons.Add("same phone")
-            If phoneticMatch >= 0.9F Then reasons.Add("names sound alike")
-            
-            Return If(reasons.Count > 0, String.Join(", ", reasons), "Multiple factors match")
-        End Function
+        'Private Function BuildFuzzyReason(idSim As Single, nameSim As Single, dobMatch As Single, phoneSim As Single, phoneticMatch As Single) As String
+        '   ... TEMPORARILY DISABLED FOR MIGRATION ...
+        'End Function
         
         Public Async Function CheckForDuplicatesByIdAsync(learnerId As Guid) As Task(Of DuplicationCheckResultDto) Implements IDuplicationDetectionService.CheckForDuplicatesByIdAsync
             Dim learner = Await _learnerRepository.GetByIdAsync(learnerId)
@@ -255,16 +189,16 @@ Namespace Services
             }
         End Function
         
-        Private Function CreateMatchWithExplanation(candidate As Learner, matchType As MatchType, confidence As Decimal, reason As String, explanation As DuplicationExplanation) As DuplicateMatchDto
-            Dim match = CreateMatch(candidate, matchType, confidence, reason)
-            
-            ' Add detailed explanation to matched fields
-            For Each factor In explanation.MatchingFactors
-                match.MatchedFields.Add($"{factor.FactorName}: {factor.Description}")
-            Next
-            
-            Return match
-        End Function
+        'Private Function CreateMatchWithExplanation(candidate As Learner, matchType As MatchType, confidence As Decimal, reason As String, explanation As DuplicationExplanation) As DuplicateMatchDto
+        '    Dim match = CreateMatch(candidate, matchType, confidence, reason)
+        '    
+        '    ' Add detailed explanation to matched fields
+        '    For Each factor In explanation.MatchingFactors
+        '        match.MatchedFields.Add($"{factor.FactorName}: {factor.Description}")
+        '    Next
+        '    
+        '    Return match
+        'End Function
         
         Private Async Function SaveDuplicationFlags(learnerId As Guid, matches As List(Of DuplicateMatchDto)) As Task
             Dim flags = New List(Of DuplicationFlag)()

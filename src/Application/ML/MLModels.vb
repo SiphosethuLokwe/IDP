@@ -1,4 +1,4 @@
-Namespace Application.ML
+Namespace IDP.Application.ML
 
     ''' <summary>
     ''' Input data for training the ML model

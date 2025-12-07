@@ -1,6 +1,6 @@
 Imports System
 
-Namespace Application.ML
+Namespace IDP.Application.ML
 
     ''' <summary>
     ''' Fuzzy string matching algorithms for detecting similar but not identical data
@@ -202,7 +202,7 @@ Namespace Application.ML
                 k += 1
             Next
             
-            Return (matches / len1 + matches / len2 + (matches - transpositions / 2) / matches) / 3.0F
+            Return CSng((matches / len1 + matches / len2 + (matches - transpositions / 2) / matches) / 3.0)
         End Function
 
         Private Function IsVowel(c As Char) As Boolean

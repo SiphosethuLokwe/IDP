@@ -19,8 +19,8 @@
     <PackageReference Include="Hangfire.Core" Version="1.8.9" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.9" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.9" />
-    <PackageReference Include="Refit" Version="7.0.0" />
-    <PackageReference Include="Refit.HttpClientFactory" Version="7.0.0" />
+    <PackageReference Include="Refit" Version="7.2.22" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="7.2.22" />
   </ItemGroup>
 
 </Project>

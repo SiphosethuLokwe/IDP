@@ -68,15 +68,7 @@ Namespace Persistence.Repositories
             
             ' Build a complex query to find potential matches
             Dim potentialDuplicates = Await query _
-                .Where(Function(l) 
-                    (Not String.IsNullOrEmpty(learner.IdNumber) AndAlso l.IdNumber = learner.IdNumber) OrElse
-                    (Not String.IsNullOrEmpty(learner.PassportNumber) AndAlso l.PassportNumber = learner.PassportNumber) OrElse
-                    (Not String.IsNullOrEmpty(learner.PhoneNumber) AndAlso l.PhoneNumber = learner.PhoneNumber) OrElse
-                    (Not String.IsNullOrEmpty(learner.Email) AndAlso l.Email = learner.Email) OrElse
-                    (l.FirstName = learner.FirstName AndAlso l.LastName = learner.LastName AndAlso 
-                     learner.DateOfBirth.HasValue AndAlso l.DateOfBirth.HasValue AndAlso 
-                     l.DateOfBirth.Value = learner.DateOfBirth.Value)
-                End Function) _
+                .Where(Function(l) (Not String.IsNullOrEmpty(learner.IdNumber) AndAlso l.IdNumber = learner.IdNumber) OrElse (Not String.IsNullOrEmpty(learner.PassportNumber) AndAlso l.PassportNumber = learner.PassportNumber) OrElse (Not String.IsNullOrEmpty(learner.PhoneNumber) AndAlso l.PhoneNumber = learner.PhoneNumber) OrElse (Not String.IsNullOrEmpty(learner.Email) AndAlso l.Email = learner.Email) OrElse (l.FirstName = learner.FirstName AndAlso l.LastName = learner.LastName AndAlso learner.DateOfBirth.HasValue AndAlso l.DateOfBirth.HasValue AndAlso l.DateOfBirth.Value = learner.DateOfBirth.Value)) _
                 .ToListAsync()
             
             Return potentialDuplicates

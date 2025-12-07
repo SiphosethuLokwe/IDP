@@ -15,7 +15,12 @@ Namespace DependencyInjection
         Public Function AddInfrastructure(services As IServiceCollection, connectionString As String, checkIdBaseUrl As String) As IServiceCollection
             ' Database
             services.AddDbContext(Of ApplicationDbContext)(
-                Sub(options) options.UseSqlServer(connectionString)
+                Sub(options)
+                    options.UseSqlServer(connectionString,
+                        Sub(sqlOptions)
+                            sqlOptions.MigrationsAssembly("IDP.Migrations")
+                        End Sub)
+                End Sub
             )
             
             ' Repositories

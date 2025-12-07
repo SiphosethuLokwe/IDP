@@ -111,10 +111,7 @@ Namespace Services
                         Dim programme = Await _programmeRepository.GetByIdAsync(contract.ProgrammeId)
                         
                         ' Check for same qualification in multiple SETAs
-                        Dim duplicateQualification = activeContracts.Where(Function(c) 
-                            c.SetaId <> contract.SetaId AndAlso 
-                            c.Programme?.QualificationCode = programme.QualificationCode
-                        ).ToList()
+                        Dim duplicateQualification = activeContracts.Where(Function(c) c.SetaId <> contract.SetaId AndAlso c.Programme IsNot Nothing AndAlso c.Programme.QualificationCode = programme.QualificationCode).ToList()
                         
                         If duplicateQualification.Count > 0 Then
                             alerts.Add(New FraudAlert() With {

@@ -47,7 +47,7 @@ Namespace Services
             Dim created = Await _learnerRepository.AddAsync(learner)
             
             ' Trigger duplicate check asynchronously (fire and forget for now)
-            Dim _ = _duplicationService.CheckForDuplicatesAsync(created)
+            Dim duplicateCheckTask = _duplicationService.CheckForDuplicatesAsync(created)
             
             Return MapToDto(created)
         End Function

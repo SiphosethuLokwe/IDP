@@ -2,7 +2,7 @@ Imports System
 Imports System.Linq
 Imports IDP.Domain.Entities
 
-Namespace Application.ML
+Namespace IDP.Application.ML
 
     ''' <summary>
     ''' Explainability service - provides human-readable explanations of AI decisions
@@ -115,8 +115,8 @@ Namespace Application.ML
             Dim activeContracts2 = learner2.GetActiveContracts()
             
             explanation.AppendLine($"Active Contracts:")
-            explanation.AppendLine($"  Learner 1: {activeContracts1?.Count ?? 0} active contract(s)")
-            explanation.AppendLine($"  Learner 2: {activeContracts2?.Count ?? 0} active contract(s)")
+            explanation.AppendLine($"  Learner 1: {If(activeContracts1 IsNot Nothing, activeContracts1.Count, 0)} active contract(s)")
+            explanation.AppendLine($"  Learner 2: {If(activeContracts2 IsNot Nothing, activeContracts2.Count, 0)} active contract(s)")
             
             If activeContracts1?.Count > 0 AndAlso activeContracts2?.Count > 0 Then
                 explanation.AppendLine($"  ⚠️ WARNING: Both learners have active contracts!")

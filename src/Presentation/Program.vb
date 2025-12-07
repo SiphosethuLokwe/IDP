@@ -5,9 +5,10 @@ Imports Microsoft.Extensions.Configuration
 Imports Hangfire
 Imports IDP.Infrastructure.DependencyInjection
 Imports IDP.Infrastructure.BackgroundJobs
+Imports IDP.Infrastructure.Persistence
 
 Module Program
-    Sub Main(args As String())
+    Async Function MainAsync(args As String()) As Task
         Dim builder = WebApplication.CreateBuilder(args)
         
         ' Add services to the container
@@ -17,8 +18,8 @@ Module Program
         
         ' CORS
         builder.Services.AddCors(Sub(options)
-            options.AddPolicy("AllowReactApp", Sub(builder)
-                builder.WithOrigins("http://localhost:5173", "http://localhost:3000") _
+            options.AddPolicy("AllowReactApp", Sub(policyBuilder)
+                policyBuilder.WithOrigins("http://localhost:5173", "http://localhost:3000") _
                        .AllowAnyHeader() _
                        .AllowAnyMethod() _
                        .AllowCredentials()
@@ -30,9 +31,16 @@ Module Program
         Dim checkIdBaseUrl = builder.Configuration("ExternalApis:CheckIdBaseUrl")
         
         ' Add Infrastructure layer
-        builder.Services.AddInfrastructure(connectionString, checkIdBaseUrl)
+        AddInfrastructure(builder.Services, connectionString, checkIdBaseUrl)
         
         Dim app = builder.Build()
+        
+        ' Seed database with initial data
+        Using scope = app.Services.CreateScope()
+            Dim dbContext = scope.ServiceProvider.GetRequiredService(Of ApplicationDbContext)()
+            Dim seeder = New DatabaseSeeder(dbContext)
+            Await seeder.SeedAsync()
+        End Using
         
         ' Configure the HTTP request pipeline
         If app.Environment.IsDevelopment() Then
@@ -52,6 +60,10 @@ Module Program
         
         app.MapControllers()
         
-        app.Run()
+        Await app.RunAsync()
+    End Function
+    
+    Sub Main(args As String())
+        MainAsync(args).GetAwaiter().GetResult()
     End Sub
 End Module

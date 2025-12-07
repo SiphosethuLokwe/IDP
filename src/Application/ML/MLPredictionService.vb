@@ -3,7 +3,7 @@ Imports System
 Imports System.Threading.Tasks
 Imports IDP.Domain.Entities
 
-Namespace Application.ML
+Namespace IDP.Application.ML
 
     ''' <summary>
     ''' ML.NET prediction service for real-time duplicate detection

@@ -10,6 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\IDP.Application.vbproj" />
     <ProjectReference Include="..\Infrastructure\IDP.Infrastructure.vbproj" />
+    <ProjectReference Include="..\IDP.Migrations\IDP.Migrations.csproj" />
   </ItemGroup>
 
   <ItemGroup>

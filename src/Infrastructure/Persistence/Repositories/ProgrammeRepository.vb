@@ -28,18 +28,19 @@ Namespace Repositories
         End Function
         
         Public Async Function GetBySetaIdAsync(setaId As Guid) As Task(Of List(Of Programme)) Implements IProgrammeRepository.GetBySetaIdAsync
-            Return Await _context.Programmes _
+            Dim allProgrammes = Await _context.Programmes _
                 .Include(Function(p) p.Seta) _
-                .Where(Function(p) p.SetaId = setaId AndAlso p.IsActive) _
+                .Where(Function(p) p.SetaId.HasValue AndAlso p.SetaId.Value = setaId) _
                 .OrderBy(Function(p) p.Title) _
                 .ToListAsync()
+            Return allProgrammes.Where(Function(p) p.IsActive = True).ToList()
         End Function
         
         Public Async Function GetAllAsync() As Task(Of List(Of Programme)) Implements IProgrammeRepository.GetAllAsync
-            Return Await _context.Programmes _
+            Dim allProgrammes = Await _context.Programmes _
                 .Include(Function(p) p.Seta) _
-                .Where(Function(p) p.IsActive) _
                 .ToListAsync()
+            Return allProgrammes.Where(Function(p) p.IsActive = True).ToList()
         End Function
         
         Public Async Function AddAsync(programme As Programme) As Task(Of Programme) Implements IProgrammeRepository.AddAsync

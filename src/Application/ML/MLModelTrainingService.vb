@@ -5,7 +5,7 @@ Imports System.IO
 Imports System.Threading.Tasks
 Imports IDP.Domain.Entities
 
-Namespace Application.ML
+Namespace IDP.Application.ML
 
     ''' <summary>
     ''' ML.NET model training service
@@ -23,9 +23,11 @@ Namespace Application.ML
             _modelPath = modelPath
             
             ' Create directory if it doesn't exist
-            Dim directory = Path.GetDirectoryName(_modelPath)
-            If Not String.IsNullOrEmpty(directory) AndAlso Not Directory.Exists(directory) Then
-                Directory.CreateDirectory(directory)
+            Dim directory = System.IO.Path.GetDirectoryName(_modelPath)
+            If Not String.IsNullOrEmpty(directory) Then
+                If Not System.IO.Directory.Exists(directory) Then
+                    System.IO.Directory.CreateDirectory(directory)
+                End If
             End If
         End Sub
 
