@@ -5,6 +5,7 @@ Imports Hangfire
 Imports Hangfire.SqlServer
 Imports IDP.Application.Interfaces
 Imports IDP.Application.Services
+Imports IDP.Application.ML
 Imports IDP.Infrastructure.Persistence
 Imports IDP.Infrastructure.Persistence.Repositories
 Imports IDP.Infrastructure.External
@@ -25,12 +26,23 @@ Namespace DependencyInjection
             
             ' Repositories
             services.AddScoped(Of ILearnerRepository, LearnerRepository)()
+            services.AddScoped(Of ISetaRepository, SetaRepository)()
+            services.AddScoped(Of IProgrammeRepository, ProgrammeRepository)()
+            services.AddScoped(Of IContractRepository, ContractRepository)()
             services.AddScoped(Of IDuplicationFlagRepository, DuplicationFlagRepository)()
             services.AddScoped(Of IDuplicationRuleRepository, DuplicationRuleRepository)()
             
             ' Application Services
             services.AddScoped(Of LearnerService)()
             services.AddScoped(Of IDuplicationDetectionService, DuplicationDetectionService)()
+            
+            ' AI/ML Services - Register MLContext first
+            services.AddSingleton(Function() New Microsoft.ML.MLContext(seed:=0))
+            services.AddSingleton(Of FuzzyMatchingService)()
+            ' MLPredictionService temporarily disabled until model is trained
+            ' services.AddSingleton(Of MLPredictionService)()
+            services.AddScoped(Of ExplainabilityService)()
+            services.AddSingleton(Of MLModelTrainingService)()
             
             ' External APIs
             services.AddRefitClient(Of ICheckIdApi)() _

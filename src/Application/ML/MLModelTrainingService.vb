@@ -5,7 +5,7 @@ Imports System.IO
 Imports System.Threading.Tasks
 Imports IDP.Domain.Entities
 
-Namespace IDP.Application.ML
+Namespace ML
 
     ''' <summary>
     ''' ML.NET model training service

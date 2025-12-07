@@ -5,7 +5,7 @@ Imports IDP.Application.Interfaces
 Imports IDP.Domain.Entities
 Imports IDP.Infrastructure.Persistence
 
-Namespace Repositories
+Namespace Persistence.Repositories
     Public Class ProgrammeRepository
         Implements IProgrammeRepository
         

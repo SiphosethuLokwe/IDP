@@ -35,6 +35,10 @@ Namespace Persistence
                 ' Seed Sample Contracts
                 Await SeedContractsAsync()
                 
+                ' Seed Duplication Rules
+                Dim rulesSeeder = New DuplicationRulesSeeder(_context)
+                Await rulesSeeder.SeedAsync()
+                
                 Console.WriteLine("=== Database Seeding Completed Successfully ===")
                 
             Catch ex As Exception

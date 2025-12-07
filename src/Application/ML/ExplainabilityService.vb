@@ -2,7 +2,7 @@ Imports System
 Imports System.Linq
 Imports IDP.Domain.Entities
 
-Namespace IDP.Application.ML
+Namespace ML
 
     ''' <summary>
     ''' Explainability service - provides human-readable explanations of AI decisions

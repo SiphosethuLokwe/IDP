@@ -6,7 +6,7 @@ Imports IDP.Domain.Entities
 Imports IDP.Domain.Enums
 Imports IDP.Infrastructure.Persistence
 
-Namespace Repositories
+Namespace Persistence.Repositories
     Public Class ContractRepository
         Implements IContractRepository
         

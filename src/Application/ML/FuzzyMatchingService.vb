@@ -1,6 +1,6 @@
 Imports System
 
-Namespace IDP.Application.ML
+Namespace ML
 
     ''' <summary>
     ''' Fuzzy string matching algorithms for detecting similar but not identical data

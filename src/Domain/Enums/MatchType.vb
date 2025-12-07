@@ -9,5 +9,6 @@ Namespace Enums
         FuzzyMatch = 7
         ExternalVerificationMatch = 8
         AIMatch = 9 ' ML.NET AI prediction
+        RuleMatch = 10 ' RulesEngine fallback match
     End Enum
 End Namespace
